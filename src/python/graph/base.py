@@ -2,6 +2,8 @@
 
 import random
 import collections
+import functools
+from typing import List
 
 
 class Node(object):
@@ -63,13 +65,79 @@ class Node(object):
 
 
 class LinkedList(object):
+
+    def __init__(self, root=None):
+        self.root = root
+        self.tail = root
+        self._size = int(root is not None)
+
+    @property
+    def size(self):
+        return self._size
+
+    def add_node(self, val: int) -> None:
+        if self.root is None:
+            self.root = LinkNode(val)
+            self.tail = self.root
+        else:
+            self.tail.next = LinkNode(val)
+            self.tail = self.tail.next
+        self._size += 1
+
+    def find(self, val: int) -> bool:
+        """Find if target value is in linked list by linear search."""
+        if self.root is None:
+            return False
+
+        node = self.root
+        while node:
+            if node.val == val:
+                return True
+            node = node.next
+        return False
+
+    def delete(self, val: int) -> bool:
+        """Delete the target value.
+        Return True if successed, other wise False.
+        """
+        if self.root.val == val:
+            self.root = self.root.next
+            self._size -= 1
+            return True
+
+        node = self.root
+        while node.next:
+            if val == node.next.val:
+                node.next = node.next.next
+                self._size -= 1
+                return True
+            node = node.next
+        return False
+
+
+    def parse_vals(self) -> List[int]:
+        """Return all values stored in linked list."""
+        if self.root is None:
+            return []
+
+        node = self.root
+        vals = [0] * self.size
+
+        for i in range(self._size):
+            vals[i] = node.val
+            node = node.next
+
+        return vals
+
+
+class LinkNode(object):
     """Linked List node."""
     def __init__(self, val, next=None):
         self.next = next
         self.val = val
 
 
-class ExtLinkedList(object):
+class ExtLinkNode(object):
     """Doubly Linked List node."""
     def __init__(self, val, next=None, prev=None):
         self.next = next
@@ -77,6 +145,7 @@ class ExtLinkedList(object):
         self.val = val
 
 
+@functools.total_ordering
 class Edge(object):
     """Directed edge which is comparable by the weights."""
     def __init__(self, u: int, v: int, w: float):
@@ -95,32 +164,11 @@ class Edge(object):
     def __str__(self):
         return f'Edge: {self._u} -> {self._v}: {self.w}'
 
-    def __compareTo(self, other):
-        """Comparison used for heap."""
-        if self.w > other.w:
-            return 1
-        elif self.w < other.w:
-            return -1
-        else:
-            return 0
-
     def __eq__(self, other):
-        return self.__compareTo(other) == 0
-
-    def __ne__(self, other):
-        return self.__compareTo(other) != 0
+        return self.w == other.w
 
     def __lt__(self, other):
-        return self.__compareTo(other) < 0
-
-    def __le__(self, other):
-        return self.__compareTo(other) <= 0
-
-    def __gt__(self, other):
-        return self.__compareTo(other) > 0
-
-    def __ge__(self, other):
-        return self.__compareTo(other) >= 0
+        return self.w < other.w
 
 
 class UDEdge(Edge):
